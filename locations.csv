@@ -1,0 +1,5 @@
+label,name,latitude,longitude,elevation,date
+ctio,CTIO,-30:09:55.5,-70:48:52.7,2200
+La Serena, La Serena, -29:54, -71:15, 30
+Stonehenge, Stonehenge, 51:10:44, -1:49:34, 30
+stonehenge-historic, Historic Stonehenge, 51:10:44, -1:49:34, 30, -2500
