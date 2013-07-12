@@ -2,12 +2,15 @@
 
 import ephem
 import matplotlib.pyplot as plt
+import pylab
 
 import config
 
 parser = config.location_parser
+parser.description = 'Plot separation between two solar system bodies and the altitude of body1.'
 parser.add_argument('body1')
 parser.add_argument('body2')
+parser.add_argument('-f', '--file', help='Output file. Will not display to screen')
 args = parser.parse_args()
 
 location = config.get_location_from_namespace(args)
@@ -56,4 +59,7 @@ ax2 = ax1.twinx()
 ax2.plot(time_list, b1_alt, c=alt_color, label='%s Altitude' % body1.name)
 plt.ylim(0,90)
 ax2.set_ylabel('Altitude of %s' % body1.name, color=alt_color)
-plt.show()
+if args.file:
+    pylab.savefig(args.file)
+else:
+    plt.show()
