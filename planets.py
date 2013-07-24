@@ -7,7 +7,12 @@ from az2dir import az2dir
 import config
 import astro_unicode
 
-location = config.default_location
+parser = config.location_parser
+parser.description = 'List the current position of all the planets'
+args = parser.parse_args()
+
+location = config.get_location_from_namespace(args)
+
 planets = (ephem.Mercury(location), ephem.Venus(location), ephem.Mars(location), ephem.Jupiter(location), ephem.Saturn(location), ephem.Uranus(location), ephem.Neptune(location))
 
 print 'Planets from %s at %s' % (location.name, config.time_conversion(ephem.now()).strftime('%c'))
