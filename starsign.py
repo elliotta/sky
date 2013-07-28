@@ -14,5 +14,5 @@ except Exception, msg:
 
 sun = ephem.Sun()
 sun.compute(date)
-print 'Zodic Sign', az2dir.ra2zodiac(sun), az2dir.ra2zodiac(sun, unicode_symbol=True)
+print 'Zodic Sign', az2dir.zodiac_sign(sun), az2dir.zodiac_sign(sun, unicode_symbol=True)
 print 'Constellation', ephem.constellation(sun)[1]

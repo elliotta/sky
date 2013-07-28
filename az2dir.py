@@ -50,7 +50,7 @@ def az2dir(azimuth):
 # Note that the zodiac as evenly spaced units do not necessary correlate with the associated asterism
 # The zodiac is traditionally measured by the longitude along the ecliptic, with Ares at zero.
 # Substituding ra for longitude might give close enough results
-def ra2zodiac(longitude, unicode_symbol=False):
+def zodiac_sign(longitude, unicode_symbol=False):
     global zodiac
     global zodiac_unicode
     if unicode_symbol:
