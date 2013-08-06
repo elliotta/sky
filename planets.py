@@ -19,7 +19,7 @@ print 'Planets from %s at %s' % (location.name, config.time_conversion(ephem.now
 
 for planet in planets:
     symbol = astro_unicode.to_unicode(planet.name)
-    print u'%s %-7s: %11s %3s in %s; phase %6.2f%%, %5.2f ㍳ earth, %5.2f ㍳ sun' % \
+    print u'%s %-7s: %11s, %3s in %s; phase %6.2f%%, %5.2f ㍳ earth, %5.2f ㍳ sun' % \
             (symbol,
              planet.name,
              str(planet.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
