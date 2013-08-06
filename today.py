@@ -5,7 +5,7 @@ import datetime
 import collections
 
 import ephem
-from az2dir import az2dir
+from az2dir import az2compass16
 from astro_unicode import to_unicode
 
 import config
@@ -30,11 +30,11 @@ bodies = collections.OrderedDict() # want to be able to reference them by name
 for body in  ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'):
     bodies[body] = getattr(ephem, body)(location)
     if bodies[body].alt > 0:
-        print u'%s %-7s: %11s %2s in %6s phase %6.2f%%' % \
+        print u'%s %-7s: %11s, %3s in %6s phase %6.2f%%' % \
                 (to_unicode(body),
                  body,
                  str(bodies[body].alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
-                 az2dir(bodies[body].az),
+                 az2compass16(bodies[body].az),
                  ephem.constellation(bodies[body])[1],
                  bodies[body].phase)
 print
