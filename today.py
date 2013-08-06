@@ -30,40 +30,38 @@ bodies = collections.OrderedDict() # want to be able to reference them by name
 for body in  ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'):
     bodies[body] = getattr(ephem, body)(location)
     if bodies[body].alt > 0:
-        print u'%s %-7s: %11s %2s in %s\n\tphase %6.2f%%, %5.2f ㍳ from Earth, %5.2f ㍳ from Sun' % \
+        print u'%s %-7s: %11s %2s in %6s phase %6.2f%%' % \
                 (to_unicode(body),
                  body,
                  str(bodies[body].alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
                  az2dir(bodies[body].az),
                  ephem.constellation(bodies[body])[1],
-                 bodies[body].phase,
-                 bodies[body].earth_distance,
-                 bodies[body].sun_distance)
+                 bodies[body].phase)
 print
 
 print "Happening Today"
 events = {}
 for name, body in bodies.iteritems():
-    events['%-8s rise   ' % name] = config.time_conversion(location.next_rising(body))
-    events['%-8s set    ' % name] = config.time_conversion(location.next_setting(body))
-    events['%-8s transit' % name] = config.time_conversion(body.transit_time)
+    events[(name, 'rise')] = config.time_conversion(location.next_rising(body))
+    events[(name, 'set')] = config.time_conversion(location.next_setting(body))
+    events[(name, 'transit')] = config.time_conversion(body.transit_time)
 
 # Twilights
 location.pressure = 0
 twilights = (("Astro", '-18'), ("Nautical", '-12'), ('Civil', '-6'))
 for t in twilights:
     location.horizon = t[1]
-    events['%-8s dawn   ' % t[0]] = config.time_conversion(location.next_rising(bodies['Sun'], use_center=True)) 
-    events['%-8s dusk   ' % t[0]] = config.time_conversion(location.next_setting(bodies['Sun'], use_center=True)) 
+    events[(t[0], 'dawn')] = config.time_conversion(location.next_rising(bodies['Sun'], use_center=True)) 
+    events[(t[0], 'dusk')] = config.time_conversion(location.next_setting(bodies['Sun'], use_center=True)) 
 
 if sleep_time:
-    events['Bedtime         '] = events['Sun      rise   '] - sleep_time
+    events[('Bedtime', '%s hr' % args.sleep)] = events[('Sun', 'rise')] - sleep_time
 
 o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 today = config.time_conversion(location.date).date()
 for what, when in o_events.iteritems():
     if when.date()  == today:
-        print '%-8s %s' % (what, when.strftime('%X'))
+        print '%-8s %-7s %s' % (what[0], what[1], when.strftime('%X'))
     else:
         break
 
