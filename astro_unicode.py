@@ -12,6 +12,7 @@ def to_unicode(ascii):
         return unicodedata.lookup('FEMALE SIGN')
     elif name == 'MOON':
         # There are two moons: first and last quarter
+        # First quarter matches the alchemical moon symbol
         return unicodedata.lookup('FIRST QUARTER MOON')
     try:
         return unicodedata.lookup(name)
