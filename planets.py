@@ -2,7 +2,7 @@
 # vim: set fileencoding=utf-8> :
 
 import ephem
-from az2dir import az2dir
+from az2dir import az2compass16
 
 import config
 import astro_unicode
@@ -19,11 +19,11 @@ print 'Planets from %s at %s' % (location.name, config.time_conversion(ephem.now
 
 for planet in planets:
     symbol = astro_unicode.to_unicode(planet.name)
-    print u'%s %-7s: %11s %2s in %s; phase %6.2f%%, %5.2f ㍳ earth, %5.2f ㍳ sun' % \
+    print u'%s %-7s: %11s %3s in %s; phase %6.2f%%, %5.2f ㍳ earth, %5.2f ㍳ sun' % \
             (symbol,
              planet.name,
              str(planet.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
-             az2dir(planet.az),
+             az2compass16(planet.az),
              ephem.constellation(planet)[0],
              planet.phase,
              planet.earth_distance,
