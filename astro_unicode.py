@@ -10,6 +10,9 @@ def to_unicode(ascii):
         return unicodedata.lookup('MALE SIGN')
     elif name == 'VENUS':
         return unicodedata.lookup('FEMALE SIGN')
+    elif name == 'MOON':
+        # There are two moons: first and last quarter
+        return unicodedata.lookup('FIRST QUARTER MOON')
     try:
         return unicodedata.lookup(name)
     except KeyError:
