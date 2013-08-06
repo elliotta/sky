@@ -46,6 +46,13 @@ def az2dir(azimuth):
     # Convert aziumth in radians to the nearest principal wind
     return radians2symbol(azimuth, principal_winds)
 
+def az2compass16(azimuth):
+    # Convert aziumth in radians to the nearest compass 16
+    return radians2symbol(azimuth, compass16)
+
+def az2compass32(azimuth):
+    # Convert aziumth in radians to the nearest compass 32
+    return radians2symbol(azimuth, compass32)
 
 # Note that the zodiac as evenly spaced units do not necessary correlate with the associated asterism
 # The zodiac is traditionally measured by the longitude along the ecliptic, with Ares at zero.
