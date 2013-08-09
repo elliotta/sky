@@ -9,6 +9,7 @@ import datetime
 import sys
 
 import ephem
+import ephem.stars # auto-import by ephem.star, but not before
 import matplotlib.pyplot as plt
 import pylab
 import matplotlib.dates
@@ -28,6 +29,8 @@ bodies = []
 for body in args.body:
     if body.title() in dir(ephem):
         bodies.append(getattr(ephem, body.title())())
+    elif body.title() in ephem.stars.stars.keys():
+        bodies.append(ephem.star(body.title()))
 
 location = config.get_location_from_namespace(args)
 
@@ -43,17 +46,19 @@ while date < end_date:
 
 local_timestamps = []
 body_alt = []
-body_phase = []
-for body in bodies:
+body_phase = {}
+for i, body in enumerate(bodies):
     body_alt.append([])
-    body_phase.append([])
+    if not isinstance(body, ephem.FixedBody):
+        body_phase[i] = [] 
 for t in utc_timestamps:
     # Set location's time, compute body's altitude, convert to degrees
     location.date = t
     for i, body in enumerate(bodies):
         body.compute(location)
         body_alt[i].append(body.alt*180/ephem.pi)
-        body_phase[i].append(body.phase)
+        if i in body_phase:
+            body_phase[i].append(body.phase)
     local_timestamps.append(config.time_conversion(location.date))
 
 sun = ephem.Sun()
@@ -92,7 +97,7 @@ ax1 = fig.add_subplot(111) # rows, columns, n-plot
 for i, alt in enumerate(body_alt):
     ax1.plot(local_timestamps, alt, c=alt_colors[i], label=bodies[i].name)
 plt.ylim(0, 90)
-ax1.set_title('%s Locations Over Next %i Days in %s' % (', '.join([body.name for body in bodies]), n_days, location.name))
+ax1.set_title('%s Locations Over %i Days in %s Starting On %s' % (', '.join([body.name for body in bodies]), n_days, location.name, config.time_conversion(location.date).strftime('%b %d, %Y')))
 ax1.set_ylabel('Altitude (Degrees Above Horizon)', color=alt_axis_color)
 ax1.set_xlabel('Time (EDT)')
 for tl in ax1.get_yticklabels():
@@ -100,13 +105,14 @@ for tl in ax1.get_yticklabels():
 if len(bodies) > 1:
     ax1.legend()
 
-ax2 = ax1.twinx()
-for i, phase in enumerate(body_phase):
-    ax2.plot(local_timestamps, phase, c=phase_colors[i])
-plt.ylim(0, 100)
-ax2.set_ylabel('Phase (% illuminated)', color=phase_axis_color)
-for tl in ax2.get_yticklabels():
-    tl.set_color(phase_axis_color)
+if len(body_phase) > 0:
+    ax2 = ax1.twinx()
+    for i, phase in body_phase.iteritems():
+        ax2.plot(local_timestamps, phase, c=phase_colors[i])
+    plt.ylim(0, 100)
+    ax2.set_ylabel('Phase (% illuminated)', color=phase_axis_color)
+    for tl in ax2.get_yticklabels():
+        tl.set_color(phase_axis_color)
 
 if n_days < 20:
     ax1.set_xticks(local_sunrises)
