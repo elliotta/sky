@@ -7,6 +7,7 @@
 
 import datetime
 import sys
+import errno
 
 import ephem
 import ephem.stars # auto-import by ephem.star, but not before
@@ -31,6 +32,9 @@ for body in args.body:
         bodies.append(getattr(ephem, body.title())())
     elif body.title() in ephem.stars.stars.keys():
         bodies.append(ephem.star(body.title()))
+    else:
+        print 'Body %s unknown' % body
+        sys.exit(errno.EINVAL)
 
 location = config.get_location_from_namespace(args)
 
