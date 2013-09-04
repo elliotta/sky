@@ -35,7 +35,7 @@ for body in args.body:
 location = config.get_location_from_namespace(args)
 
 n_days = args.days
-start_date = datetime.datetime.utcnow()
+start_date = config.time_conversion(location.date)
 end_date = start_date + datetime.timedelta(days=n_days)
 
 utc_timestamps = []
