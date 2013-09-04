@@ -9,6 +9,7 @@ from az2dir import az2compass16
 from astro_unicode import to_unicode
 
 import config
+import poi
 
 parser = config.location_parser
 parser.description = 'List the times for solar, lunar, and planetary events today.'
@@ -29,22 +30,46 @@ print "Up right now"
 bodies = collections.OrderedDict() # want to be able to reference them by name
 for body in  ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'):
     bodies[body] = getattr(ephem, body)(location)
-    if bodies[body].alt > 0:
-        print u'%s %-7s: %11s, %3s in %6s phase %6.2f%%' % \
-                (to_unicode(body),
-                 body,
-                 str(bodies[body].alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
-                 az2compass16(bodies[body].az),
-                 ephem.constellation(bodies[body])[1],
-                 bodies[body].phase)
+bodies['Galaxy'] = poi.galactic_center
+bodies['Galaxy'].compute(location)
+bodies['LMC'] = poi.large_magellanic_cloud
+bodies['LMC'].compute(location)
+
+for name, body in bodies.iteritems():
+    if body.alt > 0:
+        if hasattr(body, 'phase'):
+            print u'%s %-7s: %11s, %3s in %6s phase %6.2f%%' % \
+                    (to_unicode(name) or ' ',
+                     name,
+                     str(body.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
+                     az2compass16(body.az),
+                     ephem.constellation(body)[1],
+                     body.phase)
+        else:
+            print u'%s %-7s: %11s, %3s in %6s' % \
+                    (to_unicode(name) or ' ',
+                     name,
+                     str(body.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
+                     az2compass16(body.az),
+                     ephem.constellation(body)[1])
+
 print
 
 print "Happening Today"
 events = {}
 for name, body in bodies.iteritems():
-    events[(name, 'rise')] = config.time_conversion(location.next_rising(body))
-    events[(name, 'set')] = config.time_conversion(location.next_setting(body))
-    events[(name, 'transit')] = config.time_conversion(body.transit_time)
+    try:
+        events[(name, 'rise')] = config.time_conversion(location.next_rising(body))
+    except ephem.AlwaysUpError:
+        pass
+    try:
+        events[(name, 'set')] = config.time_conversion(location.next_setting(body))
+    except ephem.AlwaysUpError:
+        pass
+    try:
+        events[(name, 'transit')] = config.time_conversion(body.transit_time)
+    except ephem.AlwaysUpError:
+        pass
 
 # Twilights
 location.pressure = 0
@@ -60,9 +85,8 @@ if sleep_time:
 o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 today = config.time_conversion(location.date).date()
 for what, when in o_events.iteritems():
-    if when.date()  == today:
-        print '%-8s %-7s %s' % (what[0], what[1], when.strftime('%X'))
-    else:
+    if when.date() - today > datetime.timedelta(hours=24):
         break
+    print '%-8s %-7s %s' % (what[0], what[1], when.strftime('%X'))
 
 
