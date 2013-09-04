@@ -34,6 +34,10 @@ bodies['Galaxy'] = poi.galactic_center
 bodies['Galaxy'].compute(location)
 bodies['LMC'] = poi.large_magellanic_cloud
 bodies['LMC'].compute(location)
+bodies['SMC'] = poi.small_magellanic_cloud
+bodies['SMC'].compute(location)
+bodies['Crux'] = poi.crux
+bodies['Crux'].compute(location)
 
 for name, body in bodies.iteritems():
     if body.alt > 0:

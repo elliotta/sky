@@ -20,5 +20,9 @@ large_magellanic_cloud._ra = '05:23:34.5'
 large_magellanic_cloud._dec = '-69:45:22'
 
 small_magellanic_cloud = ephem.FixedBody()
-small_magellanic_cloud._ra = '00:52;44.8'
+small_magellanic_cloud._ra = '00:52:44.8'
 small_magellanic_cloud._dec = '-72:49:43'
+
+crux = ephem.FixedBody()
+crux._ra = '12:30:00.0'
+crux._dec = '-60:00:00.0'
