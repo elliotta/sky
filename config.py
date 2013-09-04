@@ -7,6 +7,7 @@ import os
 import csv
 
 import ephem
+import ephem.cities
 
 my_locations = {}
 
@@ -50,7 +51,7 @@ def _get_location(name):
     if name in my_locations:
         return my_locations[name]
 
-def get_location(name=None, temp=None, pressure=None):
+def get_location(name=None, temp=None, pressure=None, time=None):
     '''temp must be in deg C, and pressure in mBar'''
     if not name:
         location = default_location
@@ -72,11 +73,13 @@ def get_location(name=None, temp=None, pressure=None):
             location.pressure = pressure
         else:
             location.compute_pressure() # with the new temp
+    if location and time:
+        location.date = ephem.Date(time)
     return location
 
 
 def get_location_from_namespace(namespace):
-    return get_location(namespace.location, namespace.temp, namespace.pressure)
+    return get_location(namespace.location, namespace.temp, namespace.pressure, namespace.time)
 
 
 def time_conversion(ephem_time):
@@ -95,6 +98,7 @@ class ConvertTempAction(argparse.Action):
 
 location_parser = argparse.ArgumentParser()
 location_parser.add_argument('-l', '--location', help='As seen from here (default from config file)')
+location_parser.add_argument('-t', '--time', help='year/month/day [hours:minutes:seconds]')
 location_parser.add_argument('-p', '--pressure', help='Pressure in mBar')
 temp = location_parser.add_mutually_exclusive_group()
 temp.add_argument('-C', '--celcius', type=float, dest='temp', help='Temperature in degrees Celcius')
