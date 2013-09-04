@@ -56,6 +56,7 @@ for name, body in bodies.iteritems():
 print
 
 print "Happening Today"
+start  = config.time_conversion(location.date)
 events = {}
 for name, body in bodies.iteritems():
     try:
@@ -82,7 +83,6 @@ for t in twilights:
 if sleep_time:
     events[('Bedtime', '%s hr' % args.sleep)] = events[('Sun', 'rise')] - sleep_time
 
-start  = config.time_conversion(location.date)
 tomorrow = start + datetime.timedelta(days=1)
 events[(start.strftime('%b %d'), '')] = datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
 
