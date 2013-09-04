@@ -1,0 +1,11 @@
+Perseid Meteor Shower
+=====================
+
+Meteor showers are named after the constellation they seem to originate from. The consetllation does not need to be visible in order to see meteors, and in fact some of the meteors may not appear in that contellation at all. However, knowing where the constellation is will help you know where to look.
+
+* The Perseids are a shower that peaks around August 12 and appear to originate from the constellation Perseus.
+* Pyephem knows about the star Algol, which is Beta Persei (the second brightest star in the constellation).
+* Meteor showers are easiest to see if the moon is down or close to new.
+
+To get an idea for how good viewing of the Perseids might have been in 2012, try this:
+	./plot_cycles.py -b moon Algol -t 2012/08/07
