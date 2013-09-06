@@ -38,6 +38,8 @@ bodies['SMC'] = poi.small_magellanic_cloud
 bodies['SMC'].compute(location)
 bodies['Crux'] = poi.crux
 bodies['Crux'].compute(location)
+bodies['Coalsack'] = poi.coalsack
+bodies['Coalsack'].compute(location)
 
 for name, body in bodies.iteritems():
     if body.alt > 0:
