@@ -30,3 +30,7 @@ small_magellanic_cloud._dec = '-72:49:43'
 crux = ephem.FixedBody()
 crux._ra = '12:30:00.0'
 crux._dec = '-60:00:00.0'
+
+coalsack = ephem.FixedBody()
+coalsack._ra = '12:50:00'
+coalsack._dec = '-62:30:00'
