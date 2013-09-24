@@ -67,15 +67,18 @@ events = {}
 for name, body in bodies.iteritems():
     try:
         events[(name, 'rise')] = config.time_conversion(location.next_rising(body))
-    except ephem.AlwaysUpError:
+    except (ephem.AlwaysUpError, ephem.NeverUpError):
         pass
     try:
         events[(name, 'set')] = config.time_conversion(location.next_setting(body))
-    except ephem.AlwaysUpError:
+    except (ephem.AlwaysUpError, ephem.NeverUpError):
         pass
     try:
-        events[(name, 'transit')] = config.time_conversion(body.transit_time)
-    except ephem.AlwaysUpError:
+        transit_time = config.time_conversion(body.transit_time)
+        # This returns a None sometimes, instead of the errors
+        if transit_time:
+            events[(name, 'transit')] = transit_time
+    except (ephem.AlwaysUpError, ephem.NeverUpError):
         pass
 
 # Twilights
