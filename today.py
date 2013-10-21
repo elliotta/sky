@@ -93,7 +93,7 @@ if sleep_time:
     events[('Bedtime', '%s hr' % args.sleep)] = events[('Sun', 'rise')] - sleep_time
 
 tomorrow = start + datetime.timedelta(days=1)
-events[(start.strftime('%b %d'), '')] = datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
+events[(tomorrow.strftime('%b %d'), '')] = datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
 
 o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 for what, when in o_events.iteritems():
