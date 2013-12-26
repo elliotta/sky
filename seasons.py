@@ -1,11 +1,21 @@
 #!/usr/bin/env python2.7
 import collections
 import operator
+import argparse
 
 import ephem
 
 import config
 
+parser = argparse.ArgumentParser(description='Displays seasons and apsis for one year')
+parser.add_argument('-y', '--year', type=int, help='Seasons for a particular year. Default is today.')
+
+args = parser.parse_args()
+
+if args.year:
+    now = ephem.date('%i-01-01' % args.year)
+else:
+    now = ephem.now()
 sun = ephem.Sun()
 
 
@@ -40,8 +50,6 @@ def perihelion(starting_date):
     '''Closest to sun'''
     return apsis(starting_date, operator.lt)
 
-
-now = ephem.now()
 
 sol_equ = []
 
