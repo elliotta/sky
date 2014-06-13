@@ -111,9 +111,12 @@ for event, label, color, alpha in zip(sun_events, sun_event_labels, colors, alph
     plt.plot(days, event, label=label, c=color, alpha=alpha)
 if sleeptime:
     plt.plot(days, bedtimes, label="bed", c='black', alpha=1)
+# Fill daylight hours with yellow
 plt.fill_between(days, sun_events[5], sun_events[3], facecolor='yellow', alpha=.5) 
+# Fill twilights with pale blue
 plt.fill_between(days, sun_events[0], sun_events[3], facecolor='blue', alpha=.2) 
 plt.fill_between(days, sun_events[5], sun_events[8], facecolor='blue', alpha=.2) 
+# Fill nights with darker blue
 plt.fill_between(days, sun_events[0], facecolor='blue', alpha=.5) 
 plt.fill_between(days, sun_events[8], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
 # X Axis
