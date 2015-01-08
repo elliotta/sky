@@ -64,7 +64,16 @@ while config.time_conversion(date).year == year:
     # Twilights and sunrise
     for offset in horizon_offsets:
         location.horizon = offset
-        events.append(config.time_conversion(location.next_rising(sun)))
+        try:
+            sunrise = config.time_conversion(location.next_rising(sun))
+            day_type = "normal"
+        except ephem.AlwaysUpError:
+            sunrise = None
+            day_type = "sun"
+        except ephem.NeverUpError:
+            sunrise = None
+            day_type = "dark"
+        events.append(sunrise)
 
     # High Noon
     location.horizon = 0
@@ -78,16 +87,37 @@ while config.time_conversion(date).year == year:
     # Sunset and twilights
     for offset in horizon_offsets[::-1]:
         location.horizon = offset
-        events.append(config.time_conversion(location.next_setting(sun)))
+        try:
+            sunset = config.time_conversion(location.next_setting(sun))
+        except (ephem.AlwaysUpError, ephem.NeverUpError):
+            sunset = None
+        events.append(sunset)
 
     for x in xrange(len(events)):
-        hour = events[x].hour
-        hour += events[x].minute/60.
-        hour += events[x].second/3600.
+        if events[x]:
+            hour = events[x].hour
+            hour += events[x].minute/60.
+            hour += events[x].second/3600.
+        else:
+            hour = None
         sun_events[x].append(hour)
         events[x] = hour
 
-    hours_of_daylight.append(events[5] - events[3]) # sunset - sunrise
+    # 3 is sunrise, 5 is sunset
+    sunrise, sunset = events[3], events[5]
+    if sunset and sunrise:
+        if sunrise < sunset:
+            hours_of_daylight.append(sunset - sunrise) # sunset - sunrise
+        else:
+            hours_of_daylight.append(24 - (sunrise - sunset))
+    elif sunset:
+        hours_of_daylight.append(sunset)
+    elif sunrise:
+        hours_of_daylight.append(24 - sunrise)
+    elif day_type == 'sun':
+        hours_of_daylight.append(24)
+    else:
+        hours_of_daylight.append(0)
     date = ephem.Date(date+1)
 
 if sleeptime:
@@ -111,14 +141,17 @@ for event, label, color, alpha in zip(sun_events, sun_event_labels, colors, alph
     plt.plot(days, event, label=label, c=color, alpha=alpha)
 if sleeptime:
     plt.plot(days, bedtimes, label="bed", c='black', alpha=1)
+try:
 # Fill daylight hours with yellow
-plt.fill_between(days, sun_events[5], sun_events[3], facecolor='yellow', alpha=.5) 
+    plt.fill_between(days, sun_events[5], sun_events[3], facecolor='yellow', alpha=.5) 
 # Fill twilights with pale blue
-plt.fill_between(days, sun_events[0], sun_events[3], facecolor='blue', alpha=.2) 
-plt.fill_between(days, sun_events[5], sun_events[8], facecolor='blue', alpha=.2) 
+    plt.fill_between(days, sun_events[0], sun_events[3], facecolor='blue', alpha=.2) 
+    plt.fill_between(days, sun_events[5], sun_events[8], facecolor='blue', alpha=.2) 
 # Fill nights with darker blue
-plt.fill_between(days, sun_events[0], facecolor='blue', alpha=.5) 
-plt.fill_between(days, sun_events[8], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
+    plt.fill_between(days, sun_events[0], facecolor='blue', alpha=.5) 
+    plt.fill_between(days, sun_events[8], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
+except Exception as e:
+    print "Oops, not doing fills: %s" % e
 # X Axis
 plt.xticks(sol_eq, ('Vernal Eq.', 'Summer Sol.', 'Autumn Eq.', 'Winter Sol.'))
 ax.xaxis.set_minor_locator(matplotlib.dates.MonthLocator())
