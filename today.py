@@ -26,7 +26,6 @@ print 'It is %s in %s' % (config.time_conversion(location.date).strftime('%c'),
         location.name)
 print
 
-print "Up right now"
 bodies = collections.OrderedDict() # want to be able to reference them by name
 for body in  ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'):
     bodies[body] = getattr(ephem, body)(location)
@@ -41,6 +40,7 @@ bodies['Crux'].compute(location)
 bodies['Coalsack'] = poi.coalsack
 bodies['Coalsack'].compute(location)
 
+print "Up right now"
 for name, body in bodies.iteritems():
     if body.alt > 0:
         if hasattr(body, 'phase'):
