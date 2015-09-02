@@ -35,7 +35,8 @@ def apsis(starting_date, op):
             d = ephem.date(d - interval)
         else:
             if au(d) == au(d+interval) == au(d-interval):
-                #print 'Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval))
+                if interval > precision:
+                    print 'Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval))
                 break
             interval = interval/2.
     return d
