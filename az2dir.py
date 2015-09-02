@@ -30,11 +30,11 @@ def number2symbol(number, cycle_size, symbol_list):
     return symbol_list[int((number + number_per_symbol/2.)/number_per_symbol)%n_symbols]
 
 def degrees2symbol(degrees, symbol_list):
-    return number2symbol(degrees, 360, symbol_list)
+    return number2symbol(degrees, 360., symbol_list)
 
 
 def radians2symbol(radians, symbol_list):
-    return number2symbol(radians, 2*pi, symbol_list)
+    return number2symbol(radians, 2.*pi, symbol_list)
     
 
 def az2cardinal(azimuth):
