@@ -38,8 +38,9 @@ sun_events = [[], [], [], # astro, nautical civil
 sun_event_labels = ('Astro Twlt', 'Naut Twlt', 'Civil Twlt',
                     'Rise', 'Transit', 'Set',
                     'Civil Twlt', 'Naut Twlt', 'Astr Twlt')
-azimuth_at_transit = []
+altitude_at_transit = []
 hours_of_daylight = []
+negative_azimuth_at_sunrise = []
 
 # Plot properties
 colors = ('blue', 'blue', 'blue',
@@ -50,6 +51,7 @@ alphas = (.7, .8, .9,
           .9, .8, .7)
 
 # pyephem variable initialization
+starting_pressure = location.pressure
 location.pressure = 0
 sun = ephem.Sun()
 horizon_offsets = ('-18', '-12', '-6', '-0:34') # Astro, Nautical, Civil Twilights and set/rise
@@ -75,16 +77,29 @@ while config.time_conversion(date).year == year:
             day_type = "dark"
         events.append(sunrise)
 
-    # High Noon
+    # Reset
     location.horizon = 0
+    location.pressure = starting_pressure
+
+    # Azimuth at Sunrize
+    try:
+        sunrise = location.next_rising(sun)
+        location.date = sunrise
+        sun.compute(location)
+        negative_azimuth_at_sunrise.append(-(sun.az*180./ephem.pi))
+    except (ephem.AlwaysUpError, ephem.NeverUpError):
+        negative_azimuth_at_sunrise.append(None)
+    
+    # High Noon
     transit = location.next_transit(sun)
     events.append(config.time_conversion(transit))
 
     location.date = transit # This might be redundant
     sun.compute(location)
-    azimuth_at_transit.append(sun.alt*180/ephem.pi)
+    altitude_at_transit.append(sun.alt*180/ephem.pi)
 
     # Sunset and twilights
+    location.pressure = 0
     for offset in horizon_offsets[::-1]:
         location.horizon = offset
         try:
@@ -133,7 +148,7 @@ sol_eq = (config.time_conversion(ephem.next_vernal_equinox(start_date)),
           config.time_conversion(ephem.next_winter_solstice(start_date))
          )
 
-grid = gs.GridSpec(3, 1, height_ratios=[3, 1, 1])
+grid = gs.GridSpec(4, 1, height_ratios=[3, 1, 1, 1])
 
 ax = plt.subplot(grid[0])
 # Data
@@ -167,7 +182,7 @@ plt.title('The Sun in %i in %s' % (year, location.name))
 
 #ax2 = plt.subplot(grid[1], sharex=ax)
 ax2 = plt.subplot(grid[1])
-plt.plot(days, azimuth_at_transit)
+plt.plot(days, altitude_at_transit)
 plt.ylim((0, 90))
 ax2.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(30))
 ax2.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter(u'%i°'))
@@ -193,6 +208,25 @@ plt.grid(True)
 plt.ylabel('N Hours')
 plt.title('Hours of Daylight')
 
+compass16 = ('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW')
+compass16_dict = dict([(-i*22.5, value) for i, value in enumerate(compass16)])
+def deg2compass16(deg, pos):
+    if deg in compass16_dict:
+        return compass16_dict[deg]
+    else:
+        return u'%.1f°' % deg
+
+ax4 = plt.subplot(grid[3])
+plt.plot(days, negative_azimuth_at_sunrise)
+ax4.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(22.5))
+ax4.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(deg2compass16))
+plt.xticks(sol_eq)
+ax4.xaxis.set_minor_locator(matplotlib.dates.MonthLocator())
+ax4.xaxis.set_minor_formatter(matplotlib.dates.DateFormatter('%b'))
+ax4.xaxis.set_major_formatter(matplotlib.ticker.NullFormatter())
+plt.grid(True)
+plt.ylabel('Azimuth')
+plt.title('Azimuth at Sunrise')
 
 plt.tight_layout()
 if file:
