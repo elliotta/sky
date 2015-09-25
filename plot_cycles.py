@@ -39,14 +39,14 @@ for body in args.body:
 location = config.get_location_from_namespace(args)
 
 n_days = args.days
-start_date = config.time_conversion(location.date)
-end_date = start_date + datetime.timedelta(days=n_days)
+start_date = location.date
+end_date = ephem.Date(start_date + n_days)
 
 utc_timestamps = []
 date = start_date
 while date < end_date:
     utc_timestamps.append(date)
-    date = date + datetime.timedelta(minutes = 15)
+    date = date + ephem.minute*15.
 
 local_timestamps = []
 body_alt = []
@@ -69,14 +69,13 @@ sun = ephem.Sun()
 
 local_sunrises = []
 next_sunrise = location.next_rising(sun, start=start_date)
-ephem_end_date = ephem.Date(end_date)
-while next_sunrise < ephem_end_date:
+while next_sunrise < end_date:
     local_sunrises.append(config.time_conversion(next_sunrise))
     next_sunrise = location.next_rising(sun, start=next_sunrise)
 
 local_sunsets = []
 next_sunset = location.next_setting(sun, start=start_date)
-while next_sunset < ephem_end_date:
+while next_sunset < end_date:
     local_sunsets.append(config.time_conversion(next_sunset))
     next_sunset = location.next_setting(sun, start=next_sunset)
 
