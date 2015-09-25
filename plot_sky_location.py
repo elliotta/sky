@@ -23,6 +23,7 @@ parser = config.location_parser
 parser.description = 'Plot the location of a heaveny body over a particular time period.'
 parser.add_argument('-b', '--body', nargs='+', default=['Moon'], help='Heavenly body/bodies to plot (default is Moon)')
 parser.add_argument('-d', '--duration', default=120, type=int, help='How many minutes to plot (default is 120)')
+parser.add_argument('-a', '--annotations', nargs='+', help='Times to annotate')
 parser.add_argument('-f', '--file', help='Output file. Will not display to screen')
 args = parser.parse_args()
 
@@ -39,16 +40,22 @@ for body in args.body:
 location = config.get_location_from_namespace(args)
 
 n_minutes = args.duration
-start_date = config.time_conversion(location.date)
-end_date = start_date + datetime.timedelta(minutes=n_minutes)
+start_date = location.date
+end_date = start_date + ephem.minute*n_minutes
 
 utc_timestamps = []
 date = start_date
 while date < end_date:
     utc_timestamps.append(date)
-    date = date + datetime.timedelta(minutes=1)
+    date = date + ephem.minute
 
-local_timestamps = []
+if args.annotations:
+    annotations = [ephem.Date(a) for a in args.annotations]
+    # Check to be sure they're actually on the plot?
+else:
+    annotations = None
+
+
 body_alt = []
 body_az = [] 
 for i, body in enumerate(bodies):
@@ -61,7 +68,18 @@ for t in utc_timestamps:
         body.compute(location)
         body_alt[i].append(body.alt*180/ephem.pi)
         body_az[i].append(body.az*180/ephem.pi)
-    local_timestamps.append(config.time_conversion(location.date))
+if annotations:
+    annotation_alt = []
+    annotation_az = []
+    for i, body in enumerate(bodies):
+        annotation_alt.append([])
+        annotation_az.append([])
+    for a in annotations:
+        location.date = a
+        for i, body in enumerate(bodies):
+            body.compute(location)
+            annotation_alt[i].append(body.alt*180/ephem.pi)
+            annotation_az[i].append(body.az*180/ephem.pi)
 
 sun = ephem.Sun()
 
@@ -106,15 +124,31 @@ def deg2compass16(deg, pos):
 ax1 = fig.add_subplot(111) # rows, columns, n-plot
 for i, (az, alt) in enumerate(zip(body_az, body_alt)):
     ax1.plot(az, alt, c=alt_colors[i], label=bodies[i].name)
-ax1.set_title('%s Locations Over %i Minutes in %s Starting On %s' % (', '.join([body.name for body in bodies]), n_minutes, location.name, config.time_conversion(location.date).strftime('%b %d, %Y')))
 ax1.set_ylabel('Altitude (Degrees Above Horizon)', color=alt_axis_color)
 ax1.set_xlabel('Azimuth (East of North)')
 ax1.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(deg2compass16))
 ax1.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter(u'%d°'))
 for tl in ax1.get_yticklabels():
     tl.set_color(alt_axis_color)
+title = '%i Minutes from %s Staring at %s' % (n_minutes, location.name, config.time_conversion(location.date).strftime('%b %d, %Y %H:%M'))
 if len(bodies) > 1:
     ax1.legend()
+    ax1.set_title(title)
+else:
+    ax1.set_title('%s for %s' % (bodies[0].name, title))
+
+if annotations:
+    labels = [config.time_conversion(a).strftime('%Y/%m/%d\n%H:%M') for a in annotations]
+    for i, body in enumerate(bodies):
+        for label, x, y in zip(labels, annotation_az[i], annotation_alt[i]):
+            plt.annotate(label,
+                         xy = (x, y),
+                         xytext = (-20, 20),
+                         arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'),
+                         bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
+                         textcoords = 'offset points',
+                         ha = 'right',
+                         va = 'bottom')
 
 plt.tight_layout()
 
