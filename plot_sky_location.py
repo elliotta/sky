@@ -23,9 +23,7 @@ parser = config.location_parser
 parser.description = 'Plot the location of a heaveny body over a particular time period.'
 parser.add_argument('-b', '--body', nargs='+', default=['Moon'], help='Heavenly body/bodies to plot (default is Moon)')
 parser.add_argument('-d', '--duration', default=120, type=int, help='How many minutes to plot (default is 120)')
-parser.add_argument('-a', '--annotations', nargs='+', help='Times to annotate')
-# There must be a better way to handle this one...
-parser.add_argument('-n', '--notes', nargs='+', help='Words to annotate at times from -a')
+parser.add_argument('-a', '--annotations', action='append', nargs='+', help='Times to annotate')
 parser.add_argument('-f', '--file', help='Output file. Will not display to screen')
 args = parser.parse_args()
 
@@ -52,7 +50,7 @@ while date < end_date:
     date = date + ephem.minute
 
 if args.annotations:
-    annotations = [ephem.Date(a) for a in args.annotations]
+    annotations = [ephem.Date(a[0]) for a in args.annotations]
     # Check to be sure they're actually on the plot?
 else:
     annotations = None
@@ -142,7 +140,7 @@ else:
 if annotations:
     labels = [config.time_conversion(a).strftime('%Y/%m/%d\n%H:%M') for a in annotations]
     for i, body in enumerate(bodies):
-        for label, x, y in zip(labels, annotation_az[i], annotation_alt[i]):
+        for n, (label, x, y) in enumerate(zip(labels, annotation_az[i], annotation_alt[i])):
             plt.annotate(label,
                          xy = (x, y),
                          xytext = (-20, 20),
@@ -151,9 +149,8 @@ if annotations:
                          textcoords = 'offset points',
                          ha = 'right',
                          va = 'bottom')
-        if args.notes:
-            for label, x, y in zip(args.notes, annotation_az[i], annotation_alt[i]):
-                plt.annotate(label,
+            if len(args.annotations[n]) > 1:
+                plt.annotate(args.annotations[n][1],
                              xy = (x, y),
                              xytext = (20, -20),
                              arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'),
