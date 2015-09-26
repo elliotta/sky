@@ -24,6 +24,8 @@ parser.description = 'Plot the location of a heaveny body over a particular time
 parser.add_argument('-b', '--body', nargs='+', default=['Moon'], help='Heavenly body/bodies to plot (default is Moon)')
 parser.add_argument('-d', '--duration', default=120, type=int, help='How many minutes to plot (default is 120)')
 parser.add_argument('-a', '--annotations', nargs='+', help='Times to annotate')
+# There must be a better way to handle this one...
+parser.add_argument('-n', '--notes', nargs='+', help='Words to annotate at times from -a')
 parser.add_argument('-f', '--file', help='Output file. Will not display to screen')
 args = parser.parse_args()
 
@@ -130,7 +132,7 @@ ax1.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(deg2compass16))
 ax1.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter(u'%d°'))
 for tl in ax1.get_yticklabels():
     tl.set_color(alt_axis_color)
-title = '%i Minutes from %s Staring at %s' % (n_minutes, location.name, config.time_conversion(location.date).strftime('%b %d, %Y %H:%M'))
+title = '%i Minutes from %s Staring at %s' % (n_minutes, location.name, config.time_conversion(start_date).strftime('%b %d, %Y %H:%M'))
 if len(bodies) > 1:
     ax1.legend()
     ax1.set_title(title)
@@ -149,6 +151,16 @@ if annotations:
                          textcoords = 'offset points',
                          ha = 'right',
                          va = 'bottom')
+        if args.notes:
+            for label, x, y in zip(args.notes, annotation_az[i], annotation_alt[i]):
+                plt.annotate(label,
+                             xy = (x, y),
+                             xytext = (20, -20),
+                             arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'),
+                             bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
+                             textcoords = 'offset points',
+                             ha = 'left',
+                             va = 'top')
 
 plt.tight_layout()
 
