@@ -19,11 +19,13 @@ import matplotlib.gridspec as gs
 
 import config
 
+
 parser = config.location_parser
 parser.description = 'Plot the location of a heaveny body over a particular time period.'
 parser.add_argument('-b', '--body', nargs='+', default=['Moon'], help='Heavenly body/bodies to plot (default is Moon)')
 parser.add_argument('-d', '--duration', default=120, type=int, help='How many minutes to plot (default is 120)')
-parser.add_argument('-a', '--annotations', action='append', nargs='+', help='Times to annotate')
+# Anything after the second argument will be ignored. Would be nice to specify that nargs can only be one or two.
+parser.add_argument('-a', '--annotations', action='append', nargs='+', help='Times to annotate, with optional second label. Multiple arguments add to the list instead of overwriting.')
 parser.add_argument('-f', '--file', help='Output file. Will not display to screen')
 args = parser.parse_args()
 
