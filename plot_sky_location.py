@@ -1,6 +1,15 @@
 #!/usr/bin/env python2.7
 # vim: set fileencoding=utf-8> :
 
+"""This code is loosely based on the plot_cycles.py file, but instead of
+plotting time along the x-axis, it plots azimuth.  This will allow you to see
+the path of an object or several objects through the sky.  For information about
+the time coordinate, annoations can be added. Here is an example for planning
+out the viewing of the lunar eclipse of the full moon on Sep 27-28, 2015.
+
+./plot_sky_location.py -t "2015/09/28 00:00" -d 330 -a "2015/09/28 00:11" "Enter Penumbra" -a "2015/09/28 1:07" "Enter Umbra" -a "2015/09/28 2:11" "Total Eclipse Begins" -a "2015/09/28 2:47" "Middle of Eclipse" -a "2015/09/28 3:23" "Total Eclipse Ends" -a "2015/09/28 4:27" "Leave Umbra" -a "2015/09/28 5:22" "Leave Penumbra"
+"""
+
 # Note that ephem DOES NOT DO TIMEZONES!!!
 # Nor does datetime.datetime.now include a timezone
 # It is much safer to use utcnow and convert later
