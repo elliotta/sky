@@ -26,19 +26,7 @@ print 'It is %s in %s' % (config.time_conversion(location.date).strftime('%c'),
         location.name)
 print
 
-bodies = collections.OrderedDict() # want to be able to reference them by name
-for body in  ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'):
-    bodies[body] = getattr(ephem, body)(location)
-bodies['Galaxy'] = poi.galactic_center
-bodies['Galaxy'].compute(location)
-bodies['LMC'] = poi.large_magellanic_cloud
-bodies['LMC'].compute(location)
-bodies['SMC'] = poi.small_magellanic_cloud
-bodies['SMC'].compute(location)
-bodies['Crux'] = poi.crux
-bodies['Crux'].compute(location)
-bodies['Coalsack'] = poi.coalsack
-bodies['Coalsack'].compute(location)
+bodies = poi.bodies(location)
 
 print "Up right now"
 for name, body in bodies.iteritems():
@@ -99,6 +87,6 @@ o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 for what, when in o_events.iteritems():
     if when - start > datetime.timedelta(hours=24):
         break
-    print '%-8s %-7s %s' % (what[0], what[1], when.strftime('%X'))
+    print '%-10s %-7s %s' % (what[0], what[1], when.strftime('%X on %d'))
 
 
