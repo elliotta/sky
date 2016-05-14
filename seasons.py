@@ -9,6 +9,7 @@ import config
 
 parser = argparse.ArgumentParser(description='Displays seasons and apsis for one year')
 parser.add_argument('-y', '--year', type=int, help='Seasons for a particular year. Default is today.')
+parser.add_argument('-v', '--verbose', action='store_true', help='Print extra information about apsis precision')
 
 args = parser.parse_args()
 
@@ -25,7 +26,7 @@ def au(date):
 
 
 def apsis(starting_date, op):
-    interval = 1.
+    interval = 30. # About one month
     precision = ephem.minute
     d = starting_date
     while interval >= precision:
@@ -36,7 +37,18 @@ def apsis(starting_date, op):
         else:
             if au(d) == au(d+interval) == au(d-interval):
                 if interval > precision:
-                    print 'Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval))
+                    if args.verbose:
+                        print 'Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval))
+                    current_au = au(d)
+                    min_d = ephem.date(d - interval)
+                    max_d = ephem.date(d + interval)
+                    while au(min_d) == current_au:
+                        min_d = ephem.date(min_d - precision)
+                    while au(max_d) == current_au:
+                        max_d = ephem.date(max_d + precision)
+                    d = ephem.date((min_d + max_d) / 2.)
+                    if args.verbose:
+                        print 'Same distance from %s to %s, averaged to %s' % (ephem.date(min_d), ephem.date(max_d), d)
                 break
             interval = interval/2.
     return d
