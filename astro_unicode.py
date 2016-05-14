@@ -14,6 +14,13 @@ def to_unicode(ascii):
         # There are two moons: first and last quarter
         # First quarter matches the alchemical moon symbol
         return unicodedata.lookup('FIRST QUARTER MOON')
+    elif name in ('DENEB', 'VEGA', 'ALTAIR'):
+        # Summer triangle
+        return unicodedata.lookup('WHITE UP-POINTING TRIANGLE')
+    elif name in ('RIGEL', 'ALDEBARAn', 'CAPELLA', 'POLLUX', 'PROCYON', 'SIRIUS', 'BETELGUESE'):
+        # Winter Hexagon plus Betelguese
+        # Orion's shoulder Betelguese is in the middle, and with Procyon and Siruis makes the winter triangle
+        return unicodedata.lookup('WHITE HEXAGON')
     try:
         return unicodedata.lookup(name)
     except KeyError:
