@@ -25,9 +25,9 @@ print 'It is %s in %s' % (config.time_conversion(location.date).strftime('%c'),
 print "The sun is at alt %s az %s (%s)" % (str(sun.alt), str(sun.az), az2dir(sun.az))
 print
 
-locations = {'Sunrise': config.time_conversion(location.next_rising(sun)),
-             'Sunset': config.time_conversion(location.next_setting(sun)),
-             'Transit': config.time_conversion(sun.transit_time)
+locations = {'Transit': config.time_conversion(sun.transit_time),
+             'Sunrise': config.time_conversion(location.next_rising(sun)),
+             'Sunset': config.time_conversion(location.next_setting(sun))
             }
 if sleep_time:
     locations['Bedtime'] = locations['Sunrise'] - sleep_time
