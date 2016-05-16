@@ -87,6 +87,6 @@ o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 for what, when in o_events.iteritems():
     if when - start > datetime.timedelta(hours=24):
         break
-    print '%-10s %-7s %s' % (what[0], what[1], when.strftime('%X on %d'))
+    print '%-10s %-7s %s' % (what[0], what[1], when.strftime('%X'))
 
 
