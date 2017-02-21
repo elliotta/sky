@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # vim: set fileencoding=utf-8> :
 # See http://rhodesmill.org/pyephem/rise-set.html
 import datetime
@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 location = config.get_location_from_namespace(args)
 if args.sleep:
-    sleep_time = datetime.timedelta(hours=args.sleep)
+    sleep_time = args.sleep * ephem.hour
 else:
     sleep_time = False
 
@@ -50,19 +50,19 @@ for name, body in bodies.iteritems():
 print
 
 print "Happening Today"
-start  = config.time_conversion(location.date)
+start  = location.date
 events = {}
 for name, body in bodies.iteritems():
     try:
-        events[(name, 'rise')] = config.time_conversion(location.next_rising(body))
+        events[(name, 'rise')] = location.next_rising(body)
     except (ephem.AlwaysUpError, ephem.NeverUpError):
         pass
     try:
-        events[(name, 'set')] = config.time_conversion(location.next_setting(body))
+        events[(name, 'set')] = location.next_setting(body)
     except (ephem.AlwaysUpError, ephem.NeverUpError):
         pass
     try:
-        transit_time = config.time_conversion(body.transit_time)
+        transit_time = body.transit_time
         # This returns a None sometimes, instead of the errors
         if transit_time:
             events[(name, 'transit')] = transit_time
@@ -74,19 +74,19 @@ location.pressure = 0
 twilights = (("Astro", '-18'), ("Nautical", '-12'), ('Civil', '-6'))
 for t in twilights:
     location.horizon = t[1]
-    events[(t[0], 'dawn')] = config.time_conversion(location.next_rising(bodies['Sun'], use_center=True)) 
-    events[(t[0], 'dusk')] = config.time_conversion(location.next_setting(bodies['Sun'], use_center=True)) 
+    events[(t[0], 'dawn')] = location.next_rising(bodies['Sun'], use_center=True) 
+    events[(t[0], 'dusk')] = location.next_setting(bodies['Sun'], use_center=True) 
 
 if sleep_time:
     events[('Bedtime', '%s hr' % args.sleep)] = events[('Sun', 'rise')] - sleep_time
 
-tomorrow = start + datetime.timedelta(days=1)
-events[(tomorrow.strftime('%b %d'), '')] = datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day)
+tomorrow = config.time_conversion(start) + datetime.timedelta(days=1)
+events[(tomorrow.strftime('%b %d'), '')] = config.localtime_to_ephem(datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day))
 
 o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
 for what, when in o_events.iteritems():
-    if when - start > datetime.timedelta(hours=24):
+    if when - start > 1:
         break
-    print '%-10s %-7s %s' % (what[0], what[1], when.strftime('%X'))
+    print '%-10s %-7s %s' % (what[0], what[1], config.time_conversion(when).strftime('%X'))
 
 
