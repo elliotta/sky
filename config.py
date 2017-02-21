@@ -13,6 +13,7 @@ my_locations = {}
 
 locations_files = ['./locations.csv', '~/locations.csv']
 # Requires columns label, name, latitude, longitude, elevation
+# Timezone column is optional, and uses timezones understood by tz
 # Date column is optional, and uses whatever date formats ephem accepts
 # latitude: positive is North
 # longitude: positive is East
@@ -23,19 +24,20 @@ locations_files = ['./locations.csv', '~/locations.csv']
 #  personal information, like my house's coordinates.
 
 for f in locations_files:
-    with open(os.path.expandvars(os.path.expanduser(f)), 'rb') as csvfile:
-        # the skipinitialspace dialect means that ',' or ', ' are fine in between values
-        # that way I don't have to run strip on every field
-        location_reader = csv.DictReader(csvfile, skipinitialspace=True, delimiter=',')
-        for row in location_reader:
-            my_locations[row['label']] = ephem.Observer()
-            my_locations[row['label']].name = row['name']
-            my_locations[row['label']].lat = row['latitude']
-            my_locations[row['label']].long = row['longitude']
-            my_locations[row['label']].elevation = float(row['elevation'])
-            my_locations[row['label']].compute_pressure()
-            if 'date' in row and row['date']:
-                my_locations[row['label']].date = ephem.Date(row['date'])
+    if os.path.isfile(f):
+        with open(os.path.expandvars(os.path.expanduser(f)), 'rb') as csvfile:
+            # the skipinitialspace dialect means that ',' or ', ' are fine in between values
+            # that way I don't have to run strip on every field
+            location_reader = csv.DictReader(csvfile, skipinitialspace=True, delimiter=',')
+            for row in location_reader:
+                my_locations[row['label']] = ephem.Observer()
+                my_locations[row['label']].name = row['name']
+                my_locations[row['label']].lat = row['latitude']
+                my_locations[row['label']].long = row['longitude']
+                my_locations[row['label']].elevation = float(row['elevation'])
+                my_locations[row['label']].compute_pressure()
+                if 'date' in row and row['date']:
+                    my_locations[row['label']].date = ephem.Date(row['date'])
 
 
 # List of cities available by:
@@ -45,11 +47,13 @@ default_location = ephem.city('Columbus')
 
 
 def _get_location(name):
+    """Return the user-defined location if exists, else return the ephem location.
+    """
+    if name in my_locations:
+        return my_locations[name]
     ephem_cities = ephem.cities._city_data.keys()
     if name in ephem_cities:
         return ephem.city(name)
-    if name in my_locations:
-        return my_locations[name]
 
 def get_location(name=None, temp=None, pressure=None, time=None):
     '''temp must be in deg C, and pressure in mBar'''
