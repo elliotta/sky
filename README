@@ -1,7 +1,10 @@
 This is the README file (in English) for some code I'm writing.
 
-To use this code, you will need the pyepehm module and python2.7.
+To use this code, you will need the pyepehm and pytz modules and python2.7.
 The code may work with other python2.x versions, but I am using 2.7.
 
 Please customize the config.py file to at least set the right default
   location for you.
+
+TODO:
+  * Use six to make this compatible with python2 and python3.
