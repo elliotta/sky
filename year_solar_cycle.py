@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # vim: set fileencoding=utf-8> :
 
 import sys
@@ -9,6 +9,7 @@ import pylab
 import matplotlib.dates
 import matplotlib.ticker
 import matplotlib.gridspec as gs
+from datetime import datetime
 
 import config 
 
@@ -24,10 +25,8 @@ year = args.year
 file = args.file
 sleeptime = args.sleep
 
-tz = -5 # Time zone offset for starting time
-
 # Set up variables
-start_date = ephem.Date('%i/1/1 %i:30:0' % (year, 0 - tz)) # initialize at midnight:30 local time
+start_date = config.localtime_to_ephem(datetime(year=year, month=1, day=1, hour=0, minute=30)) # initialize at midnight:30 local time
 
 # X-axis
 days = []
@@ -177,7 +176,7 @@ ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator())
 ax.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%i:00'))
 #plt.legend(loc='upper left')
 plt.grid(True)
-plt.ylabel('Hour of Day (EDT)')
+plt.ylabel('Hour of Day (%s)' % config.timezone.tzname(date.datetime()))
 plt.title('The Sun in %i in %s' % (year, location.name))
 
 #ax2 = plt.subplot(grid[1], sharex=ax)
@@ -193,6 +192,7 @@ plt.ylabel('Elevation')
 plt.title('Solar Elevation at Transit (Highest of the Day)')
 
 #ax3 = plt.subplot(grid[2], sharex=ax)
+print "%f hours of daylight in a year, avg of %f/day, min %s, max %s" %  (sum(hours_of_daylight), sum(hours_of_daylight)/float(len(hours_of_daylight)), min(hours_of_daylight), max(hours_of_daylight))
 ax3 = plt.subplot(grid[2])
 plt.plot(days, hours_of_daylight)
 plt.fill_between(days, hours_of_daylight, facecolor='yellow', alpha=.5) 
