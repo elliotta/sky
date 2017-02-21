@@ -8,8 +8,10 @@ import csv
 
 import ephem
 import ephem.cities
+import pytz
 
 my_locations = {}
+timezone = pytz.timezone('UTC')
 
 locations_files = ['./locations.csv', '~/locations.csv']
 # Requires columns label, name, latitude, longitude, elevation
@@ -30,27 +32,27 @@ for f in locations_files:
             # that way I don't have to run strip on every field
             location_reader = csv.DictReader(csvfile, skipinitialspace=True, delimiter=',')
             for row in location_reader:
-                my_locations[row['label']] = ephem.Observer()
-                my_locations[row['label']].name = row['name']
-                my_locations[row['label']].lat = row['latitude']
-                my_locations[row['label']].long = row['longitude']
-                my_locations[row['label']].elevation = float(row['elevation'])
-                my_locations[row['label']].compute_pressure()
+                my_locations[row['label']] = {}
+                my_locations[row['label']]['observer'] = ephem.Observer()
+                my_locations[row['label']]['observer'].name = row['name']
+                my_locations[row['label']]['observer'].lat = row['latitude']
+                my_locations[row['label']]['observer'].long = row['longitude']
+                my_locations[row['label']]['observer'].elevation = float(row['elevation'])
+                my_locations[row['label']]['observer'].compute_pressure()
+                if 'timezone' in row and row['timezone']:
+                    my_locations[row['label']]['timezone'] = pytz.timezone(row['timezone'].strip())
                 if 'date' in row and row['date']:
-                    my_locations[row['label']].date = ephem.Date(row['date'])
-
-
-# List of cities available by:
-# ephem.cities._city_data.keys()
-default_location = ephem.city('Columbus')
-#default_location = my_locations['ctio']
+                    my_locations[row['label']]['observer'].date = ephem.Date(row['date'])
 
 
 def _get_location(name):
     """Return the user-defined location if exists, else return the ephem location.
     """
     if name in my_locations:
-        return my_locations[name]
+        if 'timezone' in my_locations[name]:
+            global timezone
+            timezone = my_locations[name]['timezone']
+        return my_locations[name]['observer']
     ephem_cities = ephem.cities._city_data.keys()
     if name in ephem_cities:
         return ephem.city(name)
@@ -82,17 +84,29 @@ def get_location(name=None, temp=None, pressure=None, time=None):
     return location
 
 
+# List of cities available by:
+# ephem.cities._city_data.keys()
+default_location = ephem.city('Columbus')
+timezone = pytz.timezone('America/New_York')
+#default_location = my_locations['ctio']
+
+
 def get_location_from_namespace(namespace):
     return get_location(namespace.location, namespace.temp, namespace.pressure, namespace.time)
 
 
 def time_conversion(ephem_time):
-    # just return ephem_time for UTC
-    # note that some times are None
+    """Convert from UTC to configured local time.
+    """
     if ephem_time:
-        return ephem.localtime(ephem_time)
-    else:
-        return ephem_time
+        global timezone
+        return timezone.fromutc(ephem_time.datetime())
+
+def localtime_to_ephem(localtime):
+    """Convert a local datetime object to ephem utc date
+    """
+    global timezone
+    return ephem.Date(timezone.localize(localtime).astimezone(pytz.UTC))
 
 
 class ConvertTempAction(argparse.Action):
