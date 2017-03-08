@@ -2,6 +2,8 @@
 # vim: set fileencoding=utf-8> :
 
 import sys
+from datetime import datetime
+from collections import OrderedDict
 
 import ephem
 import matplotlib.pyplot as plt
@@ -9,7 +11,6 @@ import pylab
 import matplotlib.dates
 import matplotlib.ticker
 import matplotlib.gridspec as gs
-from datetime import datetime
 
 import config 
 
@@ -31,29 +32,28 @@ start_date = config.localtime_to_ephem(datetime(year=year, month=1, day=1, hour=
 # X-axis
 days = []
 # Y-axis
-sun_events = [[], [], [], # astro, nautical civil
-              [], [], [], # rise, transit, set
-              [], [], []] # civil, nautical, astro
-sun_event_labels = ('Astro Twlt', 'Naut Twlt', 'Civil Twlt',
-                    'Rise', 'Transit', 'Set',
-                    'Civil Twlt', 'Naut Twlt', 'Astr Twlt')
+sun_events = OrderedDict()
+sun_events['Morn Astr Twlt'] = {'data': [], 'color': 'blue', 'alpha': .7, 'horizon': '-18'   }
+sun_events['Morn Naut Twlt'] = {'data': [], 'color': 'blue', 'alpha': .8, 'horizon': '-12'   }
+sun_events['Morn Civl Twlt'] = {'data': [], 'color': 'blue', 'alpha': .9, 'horizon':  '-6'   }
+sun_events['Rise'          ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  '-0:34'}
+sun_events['Morn Vit D'    ] = {'data': [], 'color': 'red' , 'alpha': .5, 'horizon': '50'    }
+sun_events['Transit'       ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  None   }
+sun_events['Eve Vit D'     ] = {'data': [], 'color': 'red' , 'alpha': .5, 'horizon': '50'    }
+sun_events['Set'           ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  '-0:34'}
+sun_events['Eve Civl Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .9, 'horizon':  '-6'   }
+sun_events['Eve Naut Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .8, 'horizon': '-12'   }
+sun_events['Eve Astr Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .7, 'horizon': '-18'   }
+
 altitude_at_transit = []
 hours_of_daylight = []
 negative_azimuth_at_sunrise = []
-
-# Plot properties
-colors = ('blue', 'blue', 'blue',
-          'red', 'red', 'red',
-          'blue', 'blue', 'blue')
-alphas = (.7, .8, .9,
-          1, 1, 1,
-          .9, .8, .7)
 
 # pyephem variable initialization
 starting_pressure = location.pressure
 location.pressure = 0
 sun = ephem.Sun()
-horizon_offsets = ('-18', '-12', '-6', '-0:34') # Astro, Nautical, Civil Twilights and set/rise
+horizon_offsets = ('-18', '-12', '-6', '-0:34', 50) # Astro, Nautical, Civil Twilights, set/rise, vitamin D
 
 # Calculate data points
 date = start_date
@@ -114,11 +114,11 @@ while config.time_conversion(date).year == year:
             hour += events[x].second/3600.
         else:
             hour = None
-        sun_events[x].append(hour)
+        sun_events.items()[x][1]['data'].append(hour)
         events[x] = hour
 
     # 3 is sunrise, 5 is sunset
-    sunrise, sunset = events[3], events[5]
+    sunrise, sunset = events[3], events[7]
     if sunset and sunrise:
         if sunrise < sunset:
             hours_of_daylight.append(sunset - sunrise) # sunset - sunrise
@@ -137,7 +137,7 @@ while config.time_conversion(date).year == year:
 if sleeptime:
     # Calculate bedtimes based on next day's sunrise
     bedtimes = []
-    for sunrise in sun_events[3][1:]:
+    for sunrise in sun_events['Rise']['data'][1:]:
         bedtimes.append(24. + sunrise - sleeptime)
     bedtimes.append(None)
 
@@ -151,19 +151,22 @@ grid = gs.GridSpec(4, 1, height_ratios=[3, 1, 1, 1])
 
 ax = plt.subplot(grid[0])
 # Data
-for event, label, color, alpha in zip(sun_events, sun_event_labels, colors, alphas):
-    plt.plot(days, event, label=label, c=color, alpha=alpha)
+print 'Days: %i' % len(days)
+for name, details in sun_events.iteritems():
+    print name, len(details['data'])
+for name, details in sun_events.iteritems():
+    plt.plot(days, details['data'], label=name, c=details['color'], alpha=details['alpha'])
 if sleeptime:
     plt.plot(days, bedtimes, label="bed", c='black', alpha=1)
 try:
 # Fill daylight hours with yellow
-    plt.fill_between(days, sun_events[5], sun_events[3], facecolor='yellow', alpha=.5) 
+    plt.fill_between(days, sun_events['Rise']['data'], sun_events['Set']['data'], facecolor='yellow', alpha=.5) 
 # Fill twilights with pale blue
-    plt.fill_between(days, sun_events[0], sun_events[3], facecolor='blue', alpha=.2) 
-    plt.fill_between(days, sun_events[5], sun_events[8], facecolor='blue', alpha=.2) 
+    plt.fill_between(days, sun_events['Morn Astr Twlt']['data'], sun_events['Rise']['data'], facecolor='blue', alpha=.2) 
+    plt.fill_between(days, sun_events['Set']['data'], sun_events['Eve Astr Twlt']['data'], facecolor='blue', alpha=.2) 
 # Fill nights with darker blue
-    plt.fill_between(days, sun_events[0], facecolor='blue', alpha=.5) 
-    plt.fill_between(days, sun_events[8], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
+    plt.fill_between(days, sun_events['Morn Astr Twlt']['data'], facecolor='blue', alpha=.5) 
+    plt.fill_between(days, sun_events['Eve Astr Twlt']['data'], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
 except Exception as e:
     print "Oops, not doing fills: %s" % e
 # X Axis
