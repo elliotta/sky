@@ -33,17 +33,17 @@ start_date = config.localtime_to_ephem(datetime(year=year, month=1, day=1, hour=
 days = []
 # Y-axis
 sun_events = OrderedDict()
-sun_events['Morn Astr Twlt'] = {'data': [], 'color': 'blue', 'alpha': .7, 'horizon': '-18'   }
-sun_events['Morn Naut Twlt'] = {'data': [], 'color': 'blue', 'alpha': .8, 'horizon': '-12'   }
-sun_events['Morn Civl Twlt'] = {'data': [], 'color': 'blue', 'alpha': .9, 'horizon':  '-6'   }
-sun_events['Rise'          ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  '-0:34'}
-sun_events['Morn Vit D'    ] = {'data': [], 'color': 'red' , 'alpha': .5, 'horizon': '50'    }
-sun_events['Transit'       ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  None   }
-sun_events['Eve Vit D'     ] = {'data': [], 'color': 'red' , 'alpha': .5, 'horizon': '50'    }
-sun_events['Set'           ] = {'data': [], 'color': 'red' , 'alpha':1  , 'horizon':  '-0:34'}
-sun_events['Eve Civl Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .9, 'horizon':  '-6'   }
-sun_events['Eve Naut Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .8, 'horizon': '-12'   }
-sun_events['Eve Astr Twlt' ] = {'data': [], 'color': 'blue', 'alpha': .7, 'horizon': '-18'   }
+sun_events['Morn Astr Twlt'] = {'data': [], 'color': 'blue'  , 'alpha': .7, 'horizon': '-18'   }
+sun_events['Morn Naut Twlt'] = {'data': [], 'color': 'blue'  , 'alpha': .8, 'horizon': '-12'   }
+sun_events['Morn Civl Twlt'] = {'data': [], 'color': 'blue'  , 'alpha': .9, 'horizon':  '-6'   }
+sun_events['Rise'          ] = {'data': [], 'color': 'red'   , 'alpha':1  , 'horizon':  '-0:34'}
+sun_events['Morn Vit D'    ] = {'data': [], 'color': 'yellow', 'alpha': .9, 'horizon': '50'    }
+sun_events['Transit'       ] = {'data': [], 'color': 'red'   , 'alpha':1  , 'horizon':  None   }
+sun_events['Eve Vit D'     ] = {'data': [], 'color': 'yellow', 'alpha': .9, 'horizon': '50'    }
+sun_events['Set'           ] = {'data': [], 'color': 'red'   , 'alpha':1  , 'horizon':  '-0:34'}
+sun_events['Eve Civl Twlt' ] = {'data': [], 'color': 'blue'  , 'alpha': .9, 'horizon':  '-6'   }
+sun_events['Eve Naut Twlt' ] = {'data': [], 'color': 'blue'  , 'alpha': .8, 'horizon': '-12'   }
+sun_events['Eve Astr Twlt' ] = {'data': [], 'color': 'blue'  , 'alpha': .7, 'horizon': '-18'   }
 
 altitude_at_transit = []
 hours_of_daylight = []
@@ -53,7 +53,7 @@ negative_azimuth_at_sunrise = []
 starting_pressure = location.pressure
 location.pressure = 0
 sun = ephem.Sun()
-horizon_offsets = ('-18', '-12', '-6', '-0:34', 50) # Astro, Nautical, Civil Twilights, set/rise, vitamin D
+horizon_offsets = ('-18', '-12', '-6', '-0:34', '50') # Astro, Nautical, Civil Twilights, set/rise, vitamin D
 
 # Calculate data points
 date = start_date
@@ -151,16 +151,21 @@ grid = gs.GridSpec(4, 1, height_ratios=[3, 1, 1, 1])
 
 ax = plt.subplot(grid[0])
 # Data
-print 'Days: %i' % len(days)
-for name, details in sun_events.iteritems():
-    print name, len(details['data'])
 for name, details in sun_events.iteritems():
     plt.plot(days, details['data'], label=name, c=details['color'], alpha=details['alpha'])
 if sleeptime:
     plt.plot(days, bedtimes, label="bed", c='black', alpha=1)
 try:
 # Fill daylight hours with yellow
-    plt.fill_between(days, sun_events['Rise']['data'], sun_events['Set']['data'], facecolor='yellow', alpha=.5) 
+    plt.fill_between(days, sun_events['Rise']['data'], sun_events['Set']['data'], facecolor='yellow', alpha=.4) 
+# Fill Vitamin D hours with stronger yellow
+    vitd_days = ([], [], [])
+    for day, morn, eve in zip(days, sun_events['Morn Vit D']['data'], sun_events['Eve Vit D']['data']):
+        if morn and eve:
+            vitd_days[0].append(day)
+            vitd_days[1].append(morn)
+            vitd_days[2].append(eve)
+    plt.fill_between(vitd_days[0], vitd_days[1], vitd_days[2], facecolor='yellow', alpha=.7) 
 # Fill twilights with pale blue
     plt.fill_between(days, sun_events['Morn Astr Twlt']['data'], sun_events['Rise']['data'], facecolor='blue', alpha=.2) 
     plt.fill_between(days, sun_events['Set']['data'], sun_events['Eve Astr Twlt']['data'], facecolor='blue', alpha=.2) 
