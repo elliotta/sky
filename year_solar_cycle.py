@@ -60,25 +60,6 @@ date = start_date
 while config.time_conversion(date).year == year:
     location.date = date
     days.append(config.time_conversion(date).date())
-    events = []
-
-    # Twilights and sunrise
-    for offset in horizon_offsets:
-        location.horizon = offset
-        try:
-            sunrise = config.time_conversion(location.next_rising(sun))
-            day_type = "normal"
-        except ephem.AlwaysUpError:
-            sunrise = None
-            day_type = "sun"
-        except ephem.NeverUpError:
-            sunrise = None
-            day_type = "dark"
-        events.append(sunrise)
-
-    # Reset
-    location.horizon = 0
-    location.pressure = starting_pressure
 
     # Azimuth at Sunrize
     try:
@@ -88,37 +69,56 @@ while config.time_conversion(date).year == year:
         negative_azimuth_at_sunrise.append(-(sun.az*180./ephem.pi))
     except (ephem.AlwaysUpError, ephem.NeverUpError):
         negative_azimuth_at_sunrise.append(None)
-    
-    # High Noon
-    transit = location.next_transit(sun)
-    events.append(config.time_conversion(transit))
 
-    location.date = transit # This might be redundant
-    sun.compute(location)
-    altitude_at_transit.append(sun.alt*180/ephem.pi)
+    # Go back to the start of the day
+    location.date = date
+    for name, details in sun_events.iteritems():
+        if name == 'Transit':
+            # High Noon
+            location.horizon = 0
+            location.pressure = starting_pressure
 
-    # Sunset and twilights
-    location.pressure = 0
-    for offset in horizon_offsets[::-1]:
-        location.horizon = offset
-        try:
-            sunset = config.time_conversion(location.next_setting(sun))
-        except (ephem.AlwaysUpError, ephem.NeverUpError):
-            sunset = None
-        events.append(sunset)
+            transit = location.next_transit(sun)
+            event_time = config.time_conversion(transit)
 
-    for x in xrange(len(events)):
-        if events[x]:
-            hour = events[x].hour
-            hour += events[x].minute/60.
-            hour += events[x].second/3600.
+            location.date = transit # This might be redundant
+            sun.compute(location)
+            altitude_at_transit.append(sun.alt*180/ephem.pi)
+
+        else:
+            # Sunset and twilights
+            location.pressure = 0
+            location.horizon = details['horizon']
+            if name.startswith('Morn') or name == 'Rise':
+                try:
+                    event_time = config.time_conversion(location.next_rising(sun))
+                    if name == 'Rise':
+                        day_type = "normal"
+                except ephem.AlwaysUpError:
+                    event_time = None
+                    if name == 'Rise':
+                        day_type = "sun"
+                except ephem.NeverUpError:
+                    event_time = None
+                    if name == 'Rise':
+                        day_type = "dark"
+            else:
+                # Eve and Set
+                try:
+                    event_time = config.time_conversion(location.next_setting(sun))
+                except (ephem.AlwaysUpError, ephem.NeverUpError):
+                    event_time = None
+        if event_time:
+            # Convert to decimal hour
+            hour = event_time.hour
+            hour += event_time.minute/60.
+            hour += event_time.second/3600.
         else:
             hour = None
-        sun_events.items()[x][1]['data'].append(hour)
-        events[x] = hour
+        details['data'].append(hour)
 
-    # 3 is sunrise, 5 is sunset
-    sunrise, sunset = events[3], events[7]
+    sunrise = sun_events['Rise']['data'][-1]
+    sunset  = sun_events['Set']['data'][-1]
     if sunset and sunrise:
         if sunrise < sunset:
             hours_of_daylight.append(sunset - sunrise) # sunset - sunrise
@@ -133,6 +133,7 @@ while config.time_conversion(date).year == year:
     else:
         hours_of_daylight.append(0)
     date = ephem.Date(date+1)
+
 
 if sleeptime:
     # Calculate bedtimes based on next day's sunrise
