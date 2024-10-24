@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set fileencoding=utf-8> :
 
 import sys
@@ -72,7 +72,7 @@ while config.time_conversion(date).year == year:
 
     # Go back to the start of the day
     location.date = date
-    for name, details in sun_events.iteritems():
+    for name, details in sun_events.items():
         if name == 'Transit':
             # High Noon
             location.horizon = 0
@@ -152,7 +152,7 @@ grid = gs.GridSpec(4, 1, height_ratios=[3, 1, 1, 1])
 
 ax = plt.subplot(grid[0])
 # Data
-for name, details in sun_events.iteritems():
+for name, details in sun_events.items():
     plt.plot(days, details['data'], label=name, c=details['color'], alpha=details['alpha'])
 if sleeptime:
     plt.plot(days, bedtimes, label="bed", c='black', alpha=1)
@@ -172,9 +172,9 @@ try:
     plt.fill_between(days, sun_events['Set']['data'], sun_events['Eve Astr Twlt']['data'], facecolor='blue', alpha=.2) 
 # Fill nights with darker blue
     plt.fill_between(days, sun_events['Morn Astr Twlt']['data'], facecolor='blue', alpha=.5) 
-    plt.fill_between(days, sun_events['Eve Astr Twlt']['data'], [24.0 for x in xrange(len(days))], facecolor='blue', alpha=.5) 
+    plt.fill_between(days, sun_events['Eve Astr Twlt']['data'], [24.0 for x in range(len(days))], facecolor='blue', alpha=.5) 
 except Exception as e:
-    print "Oops, not doing fills: %s" % e
+    print("Oops, not doing fills: %s" % e)
 # X Axis
 plt.xticks(sol_eq, ('Vernal Eq.', 'Summer Sol.', 'Autumn Eq.', 'Winter Sol.'))
 ax.xaxis.set_minor_locator(matplotlib.dates.MonthLocator())
@@ -201,11 +201,11 @@ plt.ylabel('Elevation')
 plt.title('Solar Elevation at Transit (Highest of the Day)')
 
 #ax3 = plt.subplot(grid[2], sharex=ax)
-print "%f hours of daylight in a year, avg of %f/day, min %s, max %s" %  (sum(hours_of_daylight), sum(hours_of_daylight)/float(len(hours_of_daylight)), min(hours_of_daylight), max(hours_of_daylight))
+print("%f hours of daylight in a year, avg of %f/day, min %s, max %s" %  (sum(hours_of_daylight), sum(hours_of_daylight)/float(len(hours_of_daylight)), min(hours_of_daylight), max(hours_of_daylight)))
 ax3 = plt.subplot(grid[2])
 plt.plot(days, hours_of_daylight)
 plt.fill_between(days, hours_of_daylight, facecolor='yellow', alpha=.5) 
-plt.fill_between(days, hours_of_daylight, [24. for x in xrange(len(days))], facecolor='blue', alpha=.5) 
+plt.fill_between(days, hours_of_daylight, [24. for x in range(len(days))], facecolor='blue', alpha=.5) 
 plt.ylim((0, 24))
 ax3.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(6))
 #plt.setp(ax3.get_xticklabels(), visible=False)

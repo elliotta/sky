@@ -27,7 +27,7 @@ locations_files = ['./locations.csv', '~/locations.csv']
 
 for f in locations_files:
     if os.path.isfile(f):
-        with open(os.path.expandvars(os.path.expanduser(f)), 'rb') as csvfile:
+        with open(os.path.expandvars(os.path.expanduser(f)), 'r') as csvfile:
             # the skipinitialspace dialect means that ',' or ', ' are fine in between values
             # that way I don't have to run strip on every field
             location_reader = csv.DictReader(csvfile, skipinitialspace=True, delimiter=',')
