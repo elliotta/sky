@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 import collections
 import operator
 import argparse
@@ -38,7 +38,7 @@ def apsis(starting_date, op):
             if au(d) == au(d+interval) == au(d-interval):
                 if interval > precision:
                     if args.verbose:
-                        print 'Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval))
+                        print('Hit limit of precision between %s and %s' % (ephem.date(d-interval), ephem.date(d+interval)))
                     current_au = au(d)
                     min_d = ephem.date(d - interval)
                     max_d = ephem.date(d + interval)
@@ -48,7 +48,7 @@ def apsis(starting_date, op):
                         max_d = ephem.date(max_d + precision)
                     d = ephem.date((min_d + max_d) / 2.)
                     if args.verbose:
-                        print 'Same distance from %s to %s, averaged to %s' % (ephem.date(min_d), ephem.date(max_d), d)
+                        print('Same distance from %s to %s, averaged to %s' % (ephem.date(min_d), ephem.date(max_d), d))
                 break
             interval = interval/2.
     return d
@@ -78,6 +78,6 @@ for evt, date in (('Vernal (Spring) Equinox', ephem.next_vernal_equinox(now)),
 
 o_sol_equ = collections.OrderedDict(sorted(sol_equ, key=lambda t: t[1]))
 
-for what, details in o_sol_equ.iteritems():
-    print what.ljust(27), details[0].strftime('%c'), '  %.4f AU' % details[1]
+for what, details in o_sol_equ.items():
+    print(what.ljust(27), details[0].strftime('%c'), '  %.4f AU' % details[1])
 
