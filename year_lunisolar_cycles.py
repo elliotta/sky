@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # vim: set fileencoding=utf-8> :
 
 import sys
@@ -106,7 +106,7 @@ while config.time_conversion(date).year == year:
         location.horizon = offset
         day_solar_events.append(config.time_conversion(location.next_setting(sun)))
 
-    for x in xrange(len(day_solar_events)):
+    for x in range(len(day_solar_events)):
         hour = day_solar_events[x].hour
         hour += day_solar_events[x].minute/60.
         hour += day_solar_events[x].second/3600.
@@ -145,7 +145,7 @@ plt.fill_between(days, sun_events[0], sun_events[3], facecolor=night_color, alph
 plt.fill_between(days, sun_events[5], sun_events[8], facecolor=night_color, alpha=.2) 
 # Fill nights with darker blue
 plt.fill_between(days, sun_events[0], facecolor=night_color, alpha=.5) 
-plt.fill_between(days, sun_events[8], [24.0 for x in xrange(len(days))], facecolor=night_color, alpha=.5) 
+plt.fill_between(days, sun_events[8], [24.0 for x in range(len(days))], facecolor=night_color, alpha=.5) 
 # X Axis
 plt.xticks(sol_eq, ('Vernal Eq.', 'Summer Sol.', 'Autumn Eq.', 'Winter Sol.'))
 ax.xaxis.grid(color=sun_color)
@@ -179,7 +179,7 @@ plt.title('Solar (Red) and Lunar (Blue) Elevation at Transit')
 #ax3 = plt.subplot(grid[3], sharex=ax)
 ax3 = plt.subplot(grid[2])
 plt.plot(days, daily_moon_phase, color=moon_color)
-#plt.fill_between(days, daily_moon_phase, [100. for x in xrange(len(days))], facecolor='black', alpha=.4) 
+#plt.fill_between(days, daily_moon_phase, [100. for x in range(len(days))], facecolor='black', alpha=.4) 
 plt.ylim((0, 100))
 ax3.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(50))
 ax3.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(25))
@@ -200,7 +200,7 @@ plt.title('Lunar Phase')
 ax4 = plt.subplot(grid[3])
 plt.plot(days, hours_of_daylight, color=sun_color)
 plt.fill_between(days, hours_of_daylight, facecolor=daylight_color, alpha=.5) 
-plt.fill_between(days, hours_of_daylight, [24. for x in xrange(len(days))], facecolor=night_color, alpha=.5) 
+plt.fill_between(days, hours_of_daylight, [24. for x in range(len(days))], facecolor=night_color, alpha=.5) 
 plt.ylim((0, 24))
 ax4.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(6))
 plt.xticks(sol_eq)

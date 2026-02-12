@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set fileencoding=utf-8> :
 # See http://rhodesmill.org/pyephem/rise-set.html
 import datetime
@@ -22,37 +22,35 @@ if args.sleep:
 else:
     sleep_time = False
 
-print 'It is %s in %s' % (config.time_conversion(location.date).strftime('%c'),
-        location.name)
-print
+print('It is %s in %s\n' % (config.time_conversion(location.date).strftime('%c'),
+        location.name))
 
 bodies = poi.bodies(location)
 
-print "Up right now"
-for name, body in bodies.iteritems():
+print("Up right now")
+for name, body in bodies.items():
     if body.alt > 0:
         if hasattr(body, 'phase'):
-            print u'%s %-7s: %11s, %3s in %6s phase %6.2f%%' % \
+            print(u'%s %-7s: %11s, %3s in %6s phase %6.2f%%' % \
                     (to_unicode(name) or ' ',
                      name,
                      str(body.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
                      az2compass16(body.az),
                      ephem.constellation(body)[1],
-                     body.phase)
+                     body.phase))
         else:
-            print u'%s %-7s: %11s, %3s in %6s' % \
+            print(u'%s %-7s: %11s, %3s in %6s\n' % \
                     (to_unicode(name) or ' ',
                      name,
                      str(body.alt).replace(':', u'°', 1).replace(':', "'", 1).replace(':', '"', 1),
                      az2compass16(body.az),
-                     ephem.constellation(body)[1])
+                     ephem.constellation(body)[1]))
 
-print
 
-print "Happening Today"
+print("Happening Today")
 start  = location.date
 events = {}
-for name, body in bodies.iteritems():
+for name, body in bodies.items():
     try:
         events[(name, 'rise')] = location.next_rising(body)
     except (ephem.AlwaysUpError, ephem.NeverUpError):
@@ -84,9 +82,9 @@ tomorrow = config.time_conversion(start) + datetime.timedelta(days=1)
 events[(tomorrow.strftime('%b %d'), '')] = config.localtime_to_ephem(datetime.datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day))
 
 o_events = collections.OrderedDict(sorted(events.items(), key=lambda t: t[1]))
-for what, when in o_events.iteritems():
+for what, when in o_events.items():
     if when - start > 1:
         break
-    print '%-10s %-7s %s' % (what[0], what[1], config.time_conversion(when).strftime('%X'))
+    print('%-10s %-7s %s' % (what[0], what[1], config.time_conversion(when).strftime('%X')))
 
 

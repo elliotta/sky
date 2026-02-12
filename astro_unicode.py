@@ -30,5 +30,5 @@ def to_unicode(ascii):
 if __name__ == '__main__':
     import sys
     symbols = [to_unicode(w) for w in sys.argv[1:]]
-    print u' '.join(symbols)
+    print(u' '.join(symbols))
 
